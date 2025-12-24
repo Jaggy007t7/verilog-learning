@@ -11,7 +11,7 @@ module top_module(
     reg out1;
     reg next_state;
     
-    always @(negedge clk or posedge areset) begin 
+	always @(posedge clk or posedge areset) begin 
         if(areset==1'b1)begin 
             state = a;
             out1 = 1'b0;
