@@ -1,27 +1,44 @@
-module parity_detector(in,clk,out);
-input in, clk;
+module parity_detector(clk,in,out);
+input clk, in;
 output reg out;
 
+parameter even=0, odd=1;
 reg state, next_state;
 
-parameter even=0, odd=1;
-parameter s0=0, s1=1;
+always @(posedge clk) begin
+    state = next_state;
+end
 
-always @(posedge clk) begin 
+always @(*) begin
     case(state)
-        s0 : begin 
-            out <= (1'b0)^in;
-            state <= out;
-        end
-        s1 : begin
-            out <= (1'b0)^in;
-            state <= out;
+        even: begin
+            next_state = (in)?odd:even;
         end
 
-        default : begin 
-                out <= in;
-                state <= out;
+        odd: begin
+            next_state = (in)?even:odd;
+        end
+        default: begin
+           next_state = even; 
         end
     endcase
 end
+
+always @(*) begin
+    case(state)
+        even: begin
+            out = 1'b0;
+        end
+
+        odd: begin
+            out = 1'b1;
+        end
+
+        default: begin
+            out = 1'b0;
+        end
+    endcase
+end
+
+
 endmodule
