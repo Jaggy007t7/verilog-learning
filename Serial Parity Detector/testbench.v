@@ -2,27 +2,25 @@ module testbench;
 reg clk,in;
 wire out;
 
-parity_detector inst(in,clk,out);
+parity_detector uut(clk,in,out);
 
-initial begin 
-clk = 1'b0;
-forever #5 clk = ~clk;
+initial begin
+    clk=1'b1;
+    forever begin
+        #5 clk = ~clk;
+    end
 end
 
-initial begin 
+initial begin
     $dumpfile("testbench.vcd");
     $dumpvars(0,testbench);
-    #100 $finish;
 end
-initial begin 
-    #0 in = 1'b0;
-    #4 in = 1'b1;
-    #6 in = 1'b1;
-    #10 in = 1'b0;
-    #11 in = 1'b1;
-    #4 in = 1'b1;
-    #4 in = 1'b0;
-    #4 in = 1'b1;
-    #4 in = 1'b1;
+
+initial begin
+    #2 in=0; #10 in=1; #10 in=1; #10 in =1;
+    #10 in=0; #10 in=1; #10 in=1; #10 in =0;
+    #10 in=0; #10 in=1; #10 in=1; #10 in =0;
+    #10 $finish;
 end
-endmodule 
+
+endmodule
