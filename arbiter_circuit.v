@@ -21,50 +21,56 @@ module top_module (
     always@(*)begin 
         case(state)
             a:begin 
-                if(r== 3'b100)begin 
-                    next_state = d;
+                if(r[1]==1'b1)begin 
+                    next_state = b;
                 end
-                else if(r==3'b000)begin 
-                     next_state = state;
+                else if(r == 3'b000)begin 
+                    next_state = a;
                 end
-                else if(r==3'b001)begin 
-                     next_state = b;
-                end
-                else if(r==3'b010)begin 
-                     next_state = c;
-                end
-            end
-            
-            b:begin 
-                if(r==3'b001)begin 
+                else if((r[1]==1'b0)&&(r[2]==1'b1))begin 
                     next_state = c;
                 end
-                else if(r[1]==1'b0)begin 
-                     next_state = a;
+                else if(r == 3'b100) begin 
+                    next_state = d;
                 end
-             
             end
-            
+
+            b:begin 
+                if(r[1]==1'b1)begin 
+                    next_state = b;
+                end
+                else if(r[1] == 1'b0)begin 
+                    next_state = a;
+                end
+                
+            end
+
             c:begin 
-                if(r==3'b010)begin 
-                    next_state = state;
+                if(r[2]==1'b1)begin 
+                    next_state = c;
                 end
-                else if(r[2]==1'b0)begin 
-                     next_state = a;
+                else if(r[2] == 1'b0)begin 
+                    next_state = a;
                 end
+                
             end
-            
+
             d:begin 
-                if(r==3'b100)begin 
-                    next_state = state;
+                if(r[3]==1'b1)begin 
+                    next_state = d;
                 end
-                else if(r[3]==1'b0)begin 
-                     next_state = a;
+                else if(r[3] == 1'b0)begin 
+                    next_state = a;
                 end
+                
             end
-            default: next_state=a;
+
+             default: begin 
+                next_state = a;
+             end
         endcase
     end
+
             
     always@(*)begin 
           case(state)
