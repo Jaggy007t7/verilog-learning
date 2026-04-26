@@ -65,5 +65,6 @@ always @(*) begin
             out<=1'b1;
         end
     endcase
+
 end
 endmodule 
