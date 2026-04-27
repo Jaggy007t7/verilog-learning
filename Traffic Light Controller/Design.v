@@ -8,6 +8,7 @@ initial begin
     q = 1'b0;
 end
 
+    
 always @(posedge clk) begin
     q <= (j&(~q))|((~k)&q);
 end
