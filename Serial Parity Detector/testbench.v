@@ -17,6 +17,7 @@ initial begin
 end
 
 initial begin
+    #0 in=0; #10 in=0; #10 in=1; #10 in =1;
     #2 in=0; #10 in=1; #10 in=1; #10 in =1;
     #10 in=0; #10 in=1; #10 in=1; #10 in =0;
     #10 in=0; #10 in=1; #10 in=1; #10 in =0;
