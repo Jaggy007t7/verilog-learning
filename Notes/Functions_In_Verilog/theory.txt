@@ -1,0 +1,510 @@
+# Functions in Verilog
+
+A function in Verilog is a reusable block of code that:
+
+* takes inputs
+* performs calculations/logic
+* returns **one value**
+
+Very similar to functions in programming languages.
+
+---
+
+# Basic Syntax
+
+```verilog id="sbb7uy"
+function [return_width-1:0] function_name;
+
+    input declarations;
+
+    begin
+        statements;
+        function_name = return_value;
+    end
+
+endfunction
+```
+
+---
+
+# Simple Example
+
+```verilog id="8jz96o"
+module test;
+
+function [7:0] add;
+    input [7:0] a;
+    input [7:0] b;
+
+    begin
+        add = a + b;
+    end
+endfunction
+
+initial begin
+    $display("%d", add(10, 20));
+end
+
+endmodule
+```
+
+Output:
+
+```text id="9mww6g"
+30
+```
+
+---
+
+# Important Rule
+
+A function returns value by assigning to its own name:
+
+```verilog id="kdbcr4"
+add = a + b;
+```
+
+NOT:
+
+```verilog id="g0d51f"
+return a+b;   // Verilog-2001 style doesn't use return
+```
+
+(SystemVerilog supports `return`.)
+
+---
+
+# Why Functions Are Used
+
+Functions help:
+
+* avoid repeated code
+* make designs cleaner
+* perform calculations
+* create reusable logic
+
+---
+
+# Example — Reusable Parity Logic
+
+Without function:
+
+```verilog id="5fv1oc"
+parity = data[0]^data[1]^data[2]^data[3];
+```
+
+With function:
+
+```verilog id="6e74rt"
+function parity4;
+    input [3:0] d;
+
+    begin
+        parity4 = d[0]^d[1]^d[2]^d[3];
+    end
+endfunction
+```
+
+Usage:
+
+```verilog id="w3n63z"
+parity = parity4(data);
+```
+
+Cleaner and reusable.
+
+---
+
+# Function Inputs
+
+Functions can have multiple inputs.
+
+```verilog id="ovt6sh"
+function [15:0] multiply;
+    input [7:0] a;
+    input [7:0] b;
+
+    begin
+        multiply = a * b;
+    end
+endfunction
+```
+
+Usage:
+
+```verilog id="j1t1te"
+result = multiply(x, y);
+```
+
+---
+
+# Function Return Width
+
+You can specify return size.
+
+Example:
+
+```verilog id="6vhu7f"
+function [31:0] calc;
+```
+
+If omitted:
+
+```verilog id="i7mflv"
+function calc;
+```
+
+default return width = 1 bit.
+
+---
+
+# Functions Can Be Used In Expressions
+
+Example:
+
+```verilog id="mfy3ea"
+assign out = add(a,b) + multiply(c,d);
+```
+
+Functions behave like operators.
+
+---
+
+# Automatic vs Static Functions
+
+## Default = Static
+
+Variables retain values between calls.
+
+## Automatic Function
+
+Fresh storage created each call.
+
+SystemVerilog:
+
+```verilog id="lttm5r"
+function automatic [7:0] add;
+```
+
+Useful for recursive or re-entrant logic.
+
+---
+
+# Function Timing Rules
+
+Functions execute in **zero simulation time**.
+
+Therefore functions:
+
+✅ CAN:
+
+* do calculations
+* use if/case/for
+* call other functions
+
+❌ CANNOT:
+
+* contain delays
+* contain timing controls
+* use `#`
+* use `@`
+* use `wait`
+
+Invalid:
+
+```verilog id="66w3rz"
+#10 a = b;
+```
+
+Invalid:
+
+```verilog id="0b5z14"
+@(posedge clk)
+```
+
+because functions must complete instantly.
+
+---
+
+# Functions vs Tasks
+
+| Feature          | Function | Task               |
+| ---------------- | -------- | ------------------ |
+| Returns value    | Yes      | No/direct multiple |
+| Simulation time  | Zero     | Can consume time   |
+| Delays allowed   | No       | Yes                |
+| Multiple outputs | No       | Yes                |
+| Timing control   | No       | Yes                |
+
+---
+
+# Example Function vs Task
+
+## Function
+
+```verilog id="edc2wa"
+function [7:0] square;
+    input [7:0] x;
+    begin
+        square = x*x;
+    end
+endfunction
+```
+
+Usage:
+
+```verilog id="m5emfx"
+y = square(a);
+```
+
+---
+
+## Task
+
+```verilog id="6jtmj9"
+task send_data;
+    input [7:0] data;
+
+    begin
+        #10 tx = data;
+    end
+endtask
+```
+
+Tasks can include delays.
+
+---
+
+# Functions Inside Modules
+
+Functions are usually declared inside modules.
+
+```verilog id="j8ozp2"
+module test;
+
+function [7:0] add;
+    input [7:0] a,b;
+    begin
+        add = a+b;
+    end
+endfunction
+
+endmodule
+```
+
+---
+
+# Functions Can Call Functions
+
+Example:
+
+```verilog id="eyg7wp"
+function [7:0] square;
+    input [7:0] x;
+    begin
+        square = x*x;
+    end
+endfunction
+
+function [7:0] fourth_power;
+    input [7:0] y;
+    begin
+        fourth_power = square(square(y));
+    end
+endfunction
+```
+
+---
+
+# Recursive Functions
+
+Possible in SystemVerilog using `automatic`.
+
+Example factorial:
+
+```verilog id="n7i7pj"
+function automatic integer fact;
+    input integer n;
+
+    begin
+        if(n<=1)
+            fact = 1;
+        else
+            fact = n * fact(n-1);
+    end
+endfunction
+```
+
+---
+
+# Functions with Loops
+
+Allowed.
+
+Example:
+
+```verilog id="r5h08x"
+function [7:0] count_ones;
+    input [7:0] data;
+    integer i;
+
+    begin
+        count_ones = 0;
+
+        for(i=0;i<8;i=i+1)
+            count_ones = count_ones + data[i];
+    end
+endfunction
+```
+
+---
+
+# Functions in Synthesizable Design
+
+Functions are synthesizable if they use synthesizable constructs.
+
+Good:
+
+* arithmetic
+* combinational logic
+* loops with fixed bounds
+* case/if
+
+Bad/non-synthesizable:
+
+* delays
+* file operations
+* event controls
+
+---
+
+# Common Real-World Uses
+
+Functions are heavily used for:
+
+* parity generation
+* CRC calculation
+* address calculation
+* bit counting
+* encoders/decoders
+* arithmetic helpers
+* reusable combinational logic
+
+---
+
+# Verilog-2001 Compact Style
+
+Older style:
+
+```verilog id="1r0fd3"
+function [7:0] add;
+    input [7:0] a,b;
+```
+
+Modern style:
+
+```verilog id="r6vklg"
+function [7:0] add(input [7:0] a,
+                    input [7:0] b);
+begin
+    add = a+b;
+end
+endfunction
+```
+
+---
+
+# SystemVerilog Improvements
+
+SystemVerilog adds:
+
+* typed arguments
+* `void` functions
+* automatic functions
+* recursion support
+* return statement
+* default arguments
+
+Example:
+
+```verilog id="zlj4ns"
+function int add(int a,b);
+    return a+b;
+endfunction
+```
+
+---
+
+# Important Interview Questions
+
+## 1. Why can't functions contain delays?
+
+Because functions must execute in zero simulation time.
+
+---
+
+## 2. Difference between task and function?
+
+Main differences:
+
+* function returns one value
+* task may consume time
+
+---
+
+## 3. Can functions call tasks?
+
+No, because tasks may consume time.
+
+---
+
+## 4. Can tasks call functions?
+
+Yes.
+
+---
+
+# One Complete Example
+
+```verilog id="u0trg7"
+module calculator;
+
+reg  [7:0] a,b;
+wire [7:0] sum;
+wire [7:0] mul;
+
+function [7:0] add;
+    input [7:0] x,y;
+    begin
+        add = x+y;
+    end
+endfunction
+
+function [7:0] multiply;
+    input [7:0] x,y;
+    begin
+        multiply = x*y;
+    end
+endfunction
+
+assign sum = add(a,b);
+assign mul = multiply(a,b);
+
+initial begin
+    a = 10;
+    b = 5;
+
+    #1;
+    $display("SUM=%d",sum);
+    $display("MUL=%d",mul);
+end
+
+endmodule
+```
+
+Output:
+
+```text id="0c2yo6"
+SUM=15
+MUL=50
+```
